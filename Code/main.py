@@ -56,11 +56,11 @@ def main():
                                data.Y_test, model,
                                feature_indices=best_features)
 
-    knn_train_scores, test_scores = automate.test_for_all_knn(data)
-    train_scores, test_scores = automate.test_for_all_gnb(data)
-    train_scores, test_scores = automate.test_for_all_rf(data)
-    train_scores, test_scores = automate.test_for_all_svm(data)
-    train_scores, test_scores = automate.test_for_all_lr(data)
+    knn_train_scores, knn_test_scores = automate.test_for_all_knn(data)
+    gnb_train_scores, gnb_test_scores = automate.test_for_all_gnb(data)
+    rf_train_scores, rf_test_scores = automate.test_for_all_rf(data)
+    svm_train_scores, svm_test_scores = automate.test_for_all_svm(data)
+    lr_train_scores, lr_test_scores = automate.test_for_all_lr(data)
 
 
 if __name__ == "__main__":
