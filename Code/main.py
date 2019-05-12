@@ -104,3 +104,12 @@ def main():
             plt.savefig(str("Plots/")+str(d)+"_"+str(m)+".jpg"); 
             plt.show();
 
+    knn_train_scores, knn_test_scores = automate.test_for_all_knn(data)
+    gnb_train_scores, gnb_test_scores = automate.test_for_all_gnb(data)
+    rf_train_scores, rf_test_scores = automate.test_for_all_rf(data)
+    svm_train_scores, svm_test_scores = automate.test_for_all_svm(data)
+    lr_train_scores, lr_test_scores = automate.test_for_all_lr(data)
+
+
+if __name__ == "__main__":
+    main()
