@@ -61,3 +61,46 @@ def main():
     train_scores, test_scores = automate.test_for_all_rf(data)
     train_scores, test_scores = automate.test_for_all_svm(data)
     train_scores, test_scores = automate.test_for_all_lr(data)
+    
+    data_dict = dict()
+    dataset_wrk = ['breast', 'prostate'] 
+    for d in dataset_wrk:
+        data_dict[d] = Dataset2("../Data", d, kfold=10) 
+    m_list = ['knn','lr','svm','knn','rf','nb']
+    train_scores = dict()
+    test_scores = dict()
+
+    for d in data_dict:
+        train_scores[d] = dict()
+        test_scores[d] = dict()
+
+    for d in data_dict:
+        print(d,end=":\n")
+        data = data_dict[d]
+        for m in ['knn', 'nb', 'rf', 'svm', 'lr']:
+            print("\t"+str(m))
+            train_scores[d][m], test_scores[d][m]  = automod(data, mode=m)
+    import pickle
+
+    f = open("dump_trainscores_kbest.pkl","wb")
+    pickle.dump(train_scores,f)
+
+    f = open("dump_testscores_kbest.pkl","wb")
+    pickle.dump(test_scores,f)
+
+    f.close()
+    plt_titledict = {"knn":"KNN", "nb":"Naive Bayes", "rf":"Random Forest", "svm":"SVM", "lr":"Logistic Regression"}
+    for d in data_dict:
+        print(d,end=":\n")
+        data = data_dict[d]
+
+        for m in ['nb', 'rf', 'svm', 'lr', 'knn']:
+            plt.figure()
+            plt.plot(list(test_scores[d][m].keys()), list(test_scores[d][m].values()), label = "Test")
+            plt.title("Accuracy of " +str(plt_titledict[m]))
+            plt.xlabel("Number of genes")
+            plt.ylabel("Accuracy")
+            plt.legend()
+            plt.savefig(str("Plots/")+str(d)+"_"+str(m)+".jpg"); 
+            plt.show();
+
