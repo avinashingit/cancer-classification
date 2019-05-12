@@ -5,6 +5,7 @@ from tqdm import tqdm
 import logging
 
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 logging.basicConfig(level=logging.INFO)
 
@@ -102,15 +103,16 @@ class Dataset:
         self.X_test = standard_scaler.transform(self.X_test)
 
         logging.info("Standardizing is completed.")
-        
+
+
 class Dataset2:
     def __init__(self, par_dir, data_tag, kfold=5):
-        
+
         wdir = os.path.join(par_dir, data_tag)
-        
-        gene = os.path.join(wdir,"gene.csv")
-        labels = os.path.join(wdir,"labels.csv")
-                
+
+        gene = os.path.join(wdir, "gene.csv")
+        labels = os.path.join(wdir, "labels.csv")
+
         print("loading dataset:", end=" ")
         print(data_tag, end=" dataset\n")
         with open(gene, 'r') as f:
@@ -124,14 +126,14 @@ class Dataset2:
             for l in f.readlines():
                 lbl.append(int(l[0])-1)
         self.X_train = []
-        self.X_test = [] 
+        self.X_test = []
         self.Y_train = []
         self.Y_test = []
         for i in range(kfold):
-            ret = train_test_split(features, lbl, test_size =  0.2, stratify = lbl)
-            self.X_train.append(ret[0]) 
+            ret = train_test_split(features, lbl, test_size=0.2, stratify=lbl)
+            self.X_train.append(ret[0])
             self.X_test.append(ret[1])
-            self.Y_train.append(ret[2]) 
+            self.Y_train.append(ret[2])
             self.Y_test.append(ret[3])
             standard_scaler = StandardScaler()
             standard_scaler.fit(self.X_train[i])
