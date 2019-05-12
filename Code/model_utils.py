@@ -138,6 +138,7 @@ def plot_roc_curve(X_train, Y_train, X_test, Y_test, model, feature_indices=None
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
     plt.show()
+    
 def feat_sel(data, nf, mode =None, model_opt="lr"):
     num_fold = len(data.Y_train)
     ret = []
