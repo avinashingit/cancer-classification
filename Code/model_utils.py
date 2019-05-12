@@ -1,15 +1,9 @@
 import numpy as np
-import pandas as pd
-import os
-import argparse
-from tqdm import tqdm
 import logging
 
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split, cross_val_score
 
-from sklearn.feature_selection import mutual_info_classif, f_classif
-from sklearn.feature_selection import SelectKBest, SelectPercentile, SelectFromModel
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selction import RFE
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import svm
@@ -47,6 +41,13 @@ class ModelUtilities:
                 tr_acc, test_acc = self.build_nearest_neighbor_model(self, k, best_features)
                 scores[nf].append(test_acc)
         return scores
+
+
+def perform_RFE(model, n_features, step, X_train, Y_train, best_features):
+    feature_extractor = RFE(model, n_features, step)
+    feature_extractor = feature_extractor.fit(X_train[:, best_features], Y_train)
+    top_features = np.where(feature_extractor.ranking_ == 1)
+    return top_features[0]
 
 
 def get_kbest_features(X_train, Y_train, number_of_features):
