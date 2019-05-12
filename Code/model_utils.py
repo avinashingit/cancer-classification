@@ -3,7 +3,8 @@ import logging
 
 
 from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selction import RFE
+from sklearn.feature_selection import RFE
+from sklearn.feature_selection import f_classif
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import svm
@@ -138,8 +139,9 @@ def plot_roc_curve(X_train, Y_train, X_test, Y_test, model, feature_indices=None
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
     plt.show()
-    
-def feat_sel(data, nf, mode =None, model_opt="lr"):
+
+
+def feat_sel(data, nf, mode=None, model_opt="lr"):
     num_fold = len(data.Y_train)
     ret = []
     if mode is None:
@@ -147,80 +149,86 @@ def feat_sel(data, nf, mode =None, model_opt="lr"):
             ret.append(None)
     if mode == "kbest":
         for i in range(num_fold):
-            ret.append(SelectKBest(k=nf, score_func=f_classif).fit(data.X_train[i], data.Y_train[i]).get_support(indices=True))
-    else: 
+            ret.append(SelectKBest(k=nf, score_func=f_classif).fit(
+                data.X_train[i], data.Y_train[i]).get_support(indices=True))
+    else:
         for i in range(num_fold):
             lr_ext = LogisticRegression(solver='lbfgs')
-            rfe = RFE(lr_ext, nf, step = 0.1)
+            rfe = RFE(lr_ext, nf, step=0.1)
             ret.append(rfe.fit(data.X_train[i], data.Y_train[i]).get_support(indices=True))
     return ret
 
 
-def rfmodel(data, nt = 20, fid = 0, feat=None):
-    model=RandomForestClassifier(n_estimators=nt)
+def rfmodel(data, nt=20, fid=0, feat=None):
+    model = RandomForestClassifier(n_estimators=nt)
     if feat is None:
         model.fit(data.X_train[fid], data.Y_train[fid])
     else:
-        model.fit(data.X_train[fid][:,feat], data.Y_train[fid])
+        model.fit(data.X_train[fid][:, feat], data.Y_train[fid])
     return model
 
 
-def lrmodel(data,fid = 0, feat=None):
-    model=LogisticRegression(solver='lbfgs')
+def lrmodel(data, fid=0, feat=None):
+    model = LogisticRegression(solver='lbfgs')
     if feat is None:
         model.fit(data.X_train[fid], data.Y_train[fid])
     else:
-        model.fit(data.X_train[fid][:,feat], data.Y_train[fid])
+        model.fit(data.X_train[fid][:, feat], data.Y_train[fid])
     return model
 
-def knnmodel(data, kn = 5, fid = 0, feat=None):
+
+def knnmodel(data, kn=5, fid=0, feat=None):
     model = KNeighborsClassifier(n_neighbors=kn)
     if feat is None:
         model.fit(data.X_train[fid], data.Y_train[fid])
     else:
-        model.fit(data.X_train[fid][:,feat], data.Y_train[fid])
+        model.fit(data.X_train[fid][:, feat], data.Y_train[fid])
     return model
 
-def nbmodel(data, fid = 0, feat=None):
+
+def nbmodel(data, fid=0, feat=None):
     kf = len(data.X_train)
     model = GaussianNB()
     if feat is None:
         model.fit(data.X_train[fid], data.Y_train[fid])
     else:
-        model.fit(data.X_train[fid][:,feat], data.Y_train[fid])
+        model.fit(data.X_train[fid][:, feat], data.Y_train[fid])
     return model
 
-def svmmodel(data, fid = 0, feat=None):
+
+def svmmodel(data, fid=0, feat=None):
     kf = len(data.X_train)
     model = svm.SVC(C=1.0, kernel='rbf', gamma=0.01)
     if feat is None:
         model.fit(data.X_train[fid], data.Y_train[fid])
     else:
-        model.fit(data.X_train[fid][:,feat], data.Y_train[fid])
+        model.fit(data.X_train[fid][:, feat], data.Y_train[fid])
     return model
 
-def automod(data, mode= 'lr', f_sel="kbest"):
+
+def automod(data, mode='lr', f_sel="kbest"):
     train_scores = dict()
     test_scores = dict()
     kf = len(data.X_train)
     for nf in range(5, 301, 20):
-        bfeat = feat_sel(data, nf, mode =f_sel)
+        bfeat = feat_sel(data, nf, mode=f_sel)
         train_scores[nf] = 0.0
         test_scores[nf] = 0.0
         for i in range(kf):
-            if mode =='nb':
+            if mode == 'nb':
                 model = nbmodel(data, fid=i, feat=bfeat[i])
-            if mode =='lr':
+            if mode == 'lr':
                 model = lrmodel(data, fid=i, feat=bfeat[i])
-            if mode =='rf':
+            if mode == 'rf':
                 model = rfmodel(data, fid=i, feat=bfeat[i])
-            if mode =='svm':
+            if mode == 'svm':
                 model = svmmodel(data, fid=i, feat=bfeat[i])
-            if mode =='knn':
+            if mode == 'knn':
                 model = knnmodel(data, fid=i, feat=bfeat[i])
-            train_acc, test_acc = calculate_accuracies(data.X_train[i], data.Y_train[i], data.X_test[i], data.Y_test[i], model, feature_indices=bfeat[i])
+            train_acc, test_acc = calculate_accuracies(
+                data.X_train[i], data.Y_train[i], data.X_test[i], data.Y_test[i], model, feature_indices=bfeat[i])
             train_scores[nf] += train_acc
             test_scores[nf] += test_acc
-        train_scores[nf]/=kf
-        test_scores[nf]/=kf
+        train_scores[nf] /= kf
+        test_scores[nf] /= kf
     return train_scores, test_scores

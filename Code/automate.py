@@ -20,6 +20,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 
 import matplotlib.pyplot as plt
+from dataset import Dataset
+from model_utils import *
 
 logging.basicConfig(level=logging.INFO)
 

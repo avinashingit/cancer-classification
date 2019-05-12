@@ -61,3 +61,7 @@ def main():
     train_scores, test_scores = automate.test_for_all_rf(data)
     train_scores, test_scores = automate.test_for_all_svm(data)
     train_scores, test_scores = automate.test_for_all_lr(data)
+
+
+if __name__ == "__main__":
+    main()
