@@ -88,7 +88,8 @@ class Dataset:
             "Splitting the dataset into train and test sets with a split percentage of %s", split_perc)
 
         self.X_train, self.X_test, self.Y_train, self.Y_test = \
-            train_test_split(self.features, self.target, test_size=split_perc, random_state=1405)
+            train_test_split(self.features, self.target, test_size=split_perc,
+                             random_state=1405, stratify=self.target)
 
         logging.info(
             "Splitting is completed. The dimensions of the train dataset are %s", self.X_train.shape)
