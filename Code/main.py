@@ -8,67 +8,78 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    dataset_name = 'colon'
-    feature_selection_type = 'select_k_best'
-    n_features = 100
-    data = Dataset("../Data", dataset_name)
+    datasets = ['colon', 'leukemia']
+    for dataset_name in datasets:
+        feature_selection_type = 'select_k_best'
+        n_features = 100
+        data = Dataset("../Data", dataset_name)
 
-    logging.info("Selecting best features")
+        logging.info("Selecting best features")
 
-    if feature_selection_type is 'select_k_best':
-        best_features = model_utils.get_kbest_features(data.X_train,
-                                                       data.Y_train,
-                                                       n_features)
-    else:
-        top_features = model_utils.get_kbest_features(data.X_train,
-                                                      data.Y_train,
-                                                      1000)
+        if feature_selection_type is 'select_k_best':
+            best_features = model_utils.get_kbest_features(data.X_train,
+                                                           data.Y_train,
+                                                           n_features)
+        else:
+            top_features = model_utils.get_kbest_features(data.X_train,
+                                                          data.Y_train,
+                                                          1000)
+            model = model_utils.build_logistic_regression_model(
+                data.X_train, data.Y_train, feature_indices=best_features)
+            best_features = model_utils.perform_RFE(model, n_features, 10,
+                                                    data.X_train, data.Y_train,
+                                                    top_features)
+
+        logging.info("Building KNN model on %s", dataset_name)
+        # KNN
+        model = model_utils.build_nearest_neighbor_model(
+            data.X_train, data.Y_train, feature_indices=best_features)
+        model_utils.calculate_accuracies(data.X_train, data.Y_train, data.X_test,
+                                         data.Y_test, model,
+                                         feature_indices=best_features)
+
+        # Naive Bayes
+        logging.info("Building Naive Bayes model on %s", dataset_name)
+        model = model_utils.build_naive_bayes_model(
+            data.X_train, data.Y_train, feature_indices=best_features)
+        model_utils.calculate_accuracies(data.X_train, data.Y_train, data.X_test,
+                                         data.Y_test, model,
+                                         feature_indices=best_features)
+
+        # Logistic Regression
+        logging.info("Building Logistic Regression model on %s", dataset_name)
         model = model_utils.build_logistic_regression_model(
             data.X_train, data.Y_train, feature_indices=best_features)
-        best_features = model_utils.perform_RFE(model, n_features, 10,
-                                                data.X_train, data.Y_train,
-                                                top_features)
+        model_utils.calculate_accuracies(data.X_train, data.Y_train, data.X_test,
+                                         data.Y_test, model,
+                                         feature_indices=best_features)
 
-    logging.info("Building KNN model on %s", dataset_name)
-    # KNN
-    model = model_utils.build_nearest_neighbor_model(
-        data.X_train, data.Y_train, feature_indices=best_features)
-    model_utils.calculate_accuracies(data.X_train, data.Y_train, data.X_test,
-                                     data.Y_test, model,
-                                     feature_indices=best_features)
+        # SVM
+        logging.info("Building SVM model on %s", dataset_name)
+        model = model_utils.build_svm_model(data.X_train, data.Y_train,
+                                            feature_indices=best_features)
+        model_utils.calculate_accuracies(data.X_train, data.Y_train, data.X_test,
+                                         data.Y_test, model,
+                                         feature_indices=best_features)
+        model_utils.plot_roc_curve(data.X_train, data.Y_train, data.X_test,
+                                   data.Y_test, model,
+                                   feature_indices=best_features)
 
-    # Naive Bayes
-    logging.info("Building Naive Bayes model on %s", dataset_name)
-    model = model_utils.build_naive_bayes_model(
-        data.X_train, data.Y_train, feature_indices=best_features)
-    model_utils.calculate_accuracies(data.X_train, data.Y_train, data.X_test,
-                                     data.Y_test, model,
-                                     feature_indices=best_features)
+        knn_scores = automate.test_for_all_knn(data)
+        gnb_scores = automate.test_for_all_gnb(data)
+        rf_scores = automate.test_for_all_rf(data)
+        svm_scores = automate.test_for_all_svm(data)
+        lr_scores = automate.test_for_all_lr(data)
 
-    # Logistic Regression
-    logging.info("Building Logistic Regression model on %s", dataset_name)
-    model = model_utils.build_logistic_regression_model(
-        data.X_train, data.Y_train, feature_indices=best_features)
-    model_utils.calculate_accuracies(data.X_train, data.Y_train, data.X_test,
-                                     data.Y_test, model,
-                                     feature_indices=best_features)
+        scores = dict()
+        scores['knn'] = knn_scores
+        scores['gnb'] = gnb_scores
+        scores['rf'] = rf_scores
+        scores['svm'] = svm_scores
+        scores['lr_scores'] = lr_scores
 
-    # SVM
-    logging.info("Building SVM model on %s", dataset_name)
-    model = model_utils.build_svm_model(data.X_train, data.Y_train,
-                                        feature_indices=best_features)
-    model_utils.calculate_accuracies(data.X_train, data.Y_train, data.X_test,
-                                     data.Y_test, model,
-                                     feature_indices=best_features)
-    model_utils.plot_roc_curve(data.X_train, data.Y_train, data.X_test,
-                               data.Y_test, model,
-                               feature_indices=best_features)
-
-    knn_train_scores, knn_test_scores = automate.test_for_all_knn(data)
-    gnb_train_scores, gnb_test_scores = automate.test_for_all_gnb(data)
-    rf_train_scores, rf_test_scores = automate.test_for_all_rf(data)
-    svm_train_scores, svm_test_scores = automate.test_for_all_svm(data)
-    lr_train_scores, lr_test_scores = automate.test_for_all_lr(data)
+        with open("scores_"+dataset_name+".pkl", "wb") as f:
+            pickle.dump(scores, f)
 
     data_dict = dict()
     dataset_wrk = ['breast']  # , 'prostate']
