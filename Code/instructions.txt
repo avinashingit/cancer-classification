@@ -1,0 +1,2 @@
+Run the command ------ python3 main.py ------ within the Code directory.
+It will run the models for all datasets and store the results in pickle files.
