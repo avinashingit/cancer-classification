@@ -61,9 +61,9 @@ def main():
         model_utils.calculate_accuracies(data.X_train, data.Y_train, data.X_test,
                                          data.Y_test, model,
                                          feature_indices=best_features)
-        model_utils.plot_roc_curve(data.X_train, data.Y_train, data.X_test,
-                                   data.Y_test, model,
-                                   feature_indices=best_features)
+        # model_utils.plot_roc_curve(data.X_train, data.Y_train, data.X_test,
+        #                            data.Y_test, model,
+        #                            feature_indices=best_features)
 
         knn_scores = automate.test_for_all_knn(data)
         gnb_scores = automate.test_for_all_gnb(data)
@@ -92,8 +92,8 @@ def main():
     for d in data_dict:
         train_scores[d] = dict()
         test_scores[d] = dict()
-    
-    fsel="kbest"
+
+    fsel = "kbest"
     for d in data_dict:
         print(d, end=":\n")
         data = data_dict[d]
