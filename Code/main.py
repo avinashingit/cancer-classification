@@ -92,13 +92,14 @@ def main():
     for d in data_dict:
         train_scores[d] = dict()
         test_scores[d] = dict()
-
+    
+    fsel="kbest"
     for d in data_dict:
         print(d, end=":\n")
         data = data_dict[d]
         for m in ['knn', 'nb', 'rf', 'svm', 'lr']:
             print("\t"+str(m))
-            train_scores[d][m], test_scores[d][m] = model_utils.automod(data, mode=m)
+            train_scores[d][m], test_scores[d][m] = model_utils.automod(data, mode=m, f_sel=fsel)
 
     f = open("dump_trainscores_kbest.pkl", "wb")
     pickle.dump(train_scores, f)
