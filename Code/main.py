@@ -82,7 +82,7 @@ def main():
             pickle.dump(scores, f)
 
     data_dict = dict()
-    dataset_wrk = ['breast']  # , 'prostate']
+    dataset_wrk = ['breast', 'prostate']
     for d in dataset_wrk:
         data_dict[d] = Dataset2("../Data", d, kfold=10)
     m_list = ['knn', 'lr', 'svm', 'knn', 'rf', 'nb']
